@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reality 2026 — Conference Stay Finder</title>
+<link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700&family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--black:#111;--dark:#222;--mid:#555;--light:#888;--border:#ddd;--bg:#fff;--bg2:#f7f7f7;--bg3:#efefef;--red:#b00000;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Montserrat',sans-serif;background:#fff;color:#222;min-height:100vh;}
+header{position:sticky;top:0;z-index:100;background:#fff;border-bottom:2px solid #111;display:flex;align-items:center;justify-content:space-between;padding:0 2.5rem;height:64px;overflow:hidden;}
+.logo{display:flex;align-items:center;}
+.logo-sub{font-size:.58rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#888;border-left:1px solid #ddd;padding-left:.85rem;margin-left:.85rem;}
+nav{display:flex;}
+nav button{background:none;border:none;font-family:'Montserrat',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#555;padding:.5rem 1.1rem;cursor:pointer;border-bottom:3px solid transparent;margin-top:3px;}
+nav button:hover{color:#111;}
+nav button.active{color:#111;border-bottom-color:#111;}
+.view{display:none;}.view.active{display:block;}
+.hero{border-bottom:1px solid #ddd;padding:4rem 2rem 3.5rem;text-align:center;}
+.hero-eyebrow{font-size:.68rem;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:#888;margin-bottom:1rem;}
+.hero h1{font-family:'Lato',sans-serif;font-size:clamp(2rem,5vw,3.4rem);font-weight:900;line-height:1.1;color:#111;margin-bottom:.5rem;}
+.hero h1 em{font-style:italic;font-weight:300;}
+.rule{width:48px;height:2px;background:#111;margin:0 auto 1.75rem;}
+.hero p{max-width:520px;margin:0 auto;font-size:.9rem;font-weight:300;line-height:1.8;color:#555;}
+.main-wrap{max-width:1100px;margin:0 auto;padding:2.5rem 2rem 4rem;}
+.filter-bar{background:#f7f7f7;border:1px solid #ddd;padding:1rem 1.25rem;display:flex;flex-wrap:wrap;gap:1rem;align-items:center;margin-bottom:2rem;}
+.filter-group{display:flex;align-items:center;gap:.5rem;}
+.filter-bar label{font-size:.65rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#555;}
+.filter-bar input,.filter-bar select{background:#fff;border:1px solid #ddd;color:#222;font-family:'Montserrat',sans-serif;font-size:.84rem;padding:.4rem .7rem;outline:none;}
+.filter-bar input:focus,.filter-bar select:focus{border-color:#111;}
+.filter-bar input[type=checkbox]{width:auto;accent-color:#111;}
+.check-label{font-size:.76rem;color:#555;cursor:pointer;display:flex;align-items:center;gap:.4rem;}
+.host-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.25rem;}
+.host-card{background:#fff;border:1px solid #ddd;transition:border-color .15s,box-shadow .15s;position:relative;}
+.host-card:hover{border-color:#111;box-shadow:3px 3px 0 #111;}
+.host-card.full{opacity:.6;}
+.card-top-bar{height:3px;background:#111;}
+.card-top-bar.full-bar{background:#b00000;}
+.card-body{padding:1.25rem 1.4rem;}
+.card-host-name{font-family:'Lato',sans-serif;font-size:1.2rem;font-weight:700;color:#111;margin-bottom:.6rem;}
+.badge-row{display:flex;flex-wrap:wrap;gap:.35rem;margin-bottom:.85rem;}
+.badge{font-size:.62rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:.2rem .55rem;}
+.badge-cap{background:#efefef;color:#222;border:1px solid #ddd;}
+.badge-avail{background:#eaf4ee;color:#1a5c38;border:1px solid #b5d8c2;}
+.badge-full{background:#fdeaea;color:#b00000;border:1px solid #f0bfbf;}
+.badge-pref{background:#f7f7f7;color:#555;border:1px solid #ddd;}
+.card-notes{font-size:.82rem;color:#555;line-height:1.65;margin-bottom:1rem;min-height:38px;}
+.spots-section{margin-bottom:1.1rem;}
+.spots-label-row{display:flex;justify-content:space-between;font-size:.7rem;color:#888;margin-bottom:.35rem;}
+.spots-track{height:3px;background:#efefef;overflow:hidden;}
+.spots-fill{height:100%;background:#111;}
+.spots-fill.fill-red{background:#b00000;}
+.btn-book{width:100%;background:#111;color:#fff;border:none;font-family:'Montserrat',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;padding:.75rem;cursor:pointer;}
+.btn-book:hover:not([disabled]){background:#333;}
+.btn-book[disabled]{background:#efefef;color:#888;cursor:not-allowed;}
+.full-ribbon{position:absolute;top:10px;right:10px;background:#b00000;color:#fff;font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:.18rem .5rem;}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:300;align-items:center;justify-content:center;}
+.overlay.open{display:flex;}
+.modal{background:#fff;border:1px solid #ddd;border-top:3px solid #111;padding:2rem 1.75rem;width:90%;max-width:440px;max-height:90vh;overflow-y:auto;box-shadow:4px 4px 0 rgba(0,0,0,.08);animation:fadeUp .18s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+.modal-eyebrow{font-size:.62rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:#888;margin-bottom:.4rem;}
+.modal h3{font-family:'Lato',sans-serif;font-size:1.5rem;font-weight:900;color:#111;margin-bottom:.25rem;}
+.modal-sub{font-size:.78rem;color:#555;margin-bottom:1.4rem;}
+.form-group{margin-bottom:.9rem;}
+.form-group label{display:block;font-size:.63rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#555;margin-bottom:.35rem;}
+.form-group input,.form-group select,.form-group textarea{width:100%;background:#fff;border:1px solid #ddd;color:#222;font-family:'Montserrat',sans-serif;font-size:.86rem;padding:.6rem .8rem;outline:none;resize:vertical;}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:#111;}
+.party-hint{font-size:.76rem;color:#555;margin-bottom:.7rem;font-style:italic;min-height:18px;}
+.alert{padding:.7rem .9rem;font-size:.82rem;margin-bottom:.9rem;}
+.alert-ok{background:#eaf4ee;color:#1a5c38;border-left:3px solid #1a5c38;}
+.alert-err{background:#fdeaea;color:#b00000;border-left:3px solid #b00000;}
+.modal-actions{display:flex;gap:.6rem;margin-top:1.1rem;}
+.btn-cancel{flex:1;background:none;border:1px solid #ddd;color:#555;font-family:'Montserrat',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:.65rem;cursor:pointer;}
+.btn-cancel:hover{border-color:#111;color:#111;}
+.btn-submit{flex:2;background:#111;color:#fff;border:none;font-family:'Montserrat',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;padding:.65rem;cursor:pointer;}
+.btn-submit:hover:not([disabled]){background:#333;}
+.btn-submit[disabled]{background:#efefef;color:#888;cursor:not-allowed;}
+.pw-wrap{position:relative;}
+.pw-wrap input{padding-right:2.5rem;}
+.pw-eye{position:absolute;right:.7rem;top:50%;transform:translateY(-50%);background:none;border:none;color:#888;cursor:pointer;font-size:.95rem;}
+.bookings-wrap{display:flex;flex-direction:column;gap:1rem;}
+.booking-item{background:#fff;border:1px solid #ddd;border-left:3px solid #111;padding:1rem 1.25rem;display:flex;flex-wrap:wrap;align-items:center;gap:1rem;}
+.booking-left{flex:1;min-width:160px;}
+.booking-host{font-family:'Lato',sans-serif;font-size:1.05rem;color:#111;font-weight:700;}
+.booking-guest{font-size:.8rem;color:#555;margin-top:.2rem;}
+.booking-party{font-size:.76rem;color:#888;margin-top:.12rem;}
+.btn-remove{background:none;border:1px solid #f0bfbf;color:#b00000;font-family:'Montserrat',sans-serif;font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:.4rem .8rem;cursor:pointer;}
+.btn-remove:hover{background:#fdeaea;}
+.admin-stats{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:2rem;}
+.stat-card{flex:1;min-width:100px;background:#fff;border:1px solid #ddd;border-top:3px solid #111;padding:1.1rem 1rem;text-align:center;}
+.stat-num{font-family:'Lato',sans-serif;font-size:2.2rem;font-weight:900;color:#111;line-height:1;}
+.stat-lbl{font-size:.62rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#888;margin-top:.35rem;}
+.admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.25rem;}
+@media(max-width:680px){.admin-grid{grid-template-columns:1fr;}}
+.admin-panel{background:#fff;border:1px solid #ddd;padding:1.4rem;}
+.admin-panel h3{font-family:'Lato',sans-serif;font-size:1.1rem;font-weight:700;color:#111;margin-bottom:1.1rem;padding-bottom:.7rem;border-bottom:1px solid #ddd;}
+.host-row{display:flex;align-items:center;padding:.55rem 0;border-bottom:1px solid #efefef;gap:.7rem;}
+.host-row:last-child{border-bottom:none;}
+.host-row-info{flex:1;}
+.host-row-name{font-size:.86rem;color:#222;font-weight:600;}
+.host-row-sub{font-size:.73rem;color:#888;margin-top:.08rem;}
+.btn-del{background:none;border:none;color:#ddd;font-size:.95rem;cursor:pointer;padding:.2rem .4rem;}
+.btn-del:hover{color:#b00000;}
+.admin-full-panel{background:#fff;border:1px solid #ddd;padding:1.4rem;overflow-x:auto;margin-bottom:1.25rem;}
+.admin-full-panel h3{font-family:'Lato',sans-serif;font-size:1.1rem;font-weight:700;color:#111;margin-bottom:1.1rem;padding-bottom:.7rem;border-bottom:1px solid #ddd;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;}
+.export-btns{display:flex;gap:.5rem;}
+table{width:100%;border-collapse:collapse;font-size:.81rem;}
+thead tr{border-bottom:2px solid #111;}
+th{text-align:left;padding:.45rem .7rem;font-size:.62rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#555;}
+td{padding:.55rem .7rem;color:#222;border-bottom:1px solid #efefef;vertical-align:top;}
+tr:last-child td{border-bottom:none;}
+td.muted{color:#888;}
+.tbl-btn{background:none;border:1px solid #ddd;color:#555;font-family:'Montserrat',sans-serif;font-size:.63rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:.25rem .6rem;cursor:pointer;margin-right:3px;}
+.tbl-btn:hover{border-color:#111;color:#111;}
+.tbl-btn.del{border-color:#f0bfbf;color:#b00000;}
+.tbl-btn.del:hover{background:#fdeaea;}
+.tbl-btn.approve{border-color:#b5d8c2;color:#1a5c38;}
+.tbl-btn.approve:hover{background:#eaf4ee;}
+.tbl-input{width:100%;border:1px solid #ddd;padding:.3rem .5rem;font-size:.8rem;font-family:'Montserrat',sans-serif;outline:none;}
+.tbl-input:focus{border-color:#111;}
+.empty{text-align:center;padding:2.5rem 1rem;color:#888;font-size:.86rem;line-height:1.8;}
+.empty-icon{font-size:1.8rem;margin-bottom:.6rem;opacity:.4;}
+.loading{text-align:center;padding:3rem;color:#888;font-size:.84rem;}
+footer{border-top:2px solid #111;background:#111;color:rgba(255,255,255,.55);padding:1.5rem 2rem;text-align:center;font-size:.7rem;letter-spacing:.08em;line-height:2;font-family:'Montserrat',sans-serif;}
+footer a{color:rgba(255,255,255,.7);text-decoration:none;}
+footer strong{color:rgba(255,255,255,.85);}
+@media(max-width:580px){header{padding:0 1rem;}.main-wrap{padding:0 1rem 3rem;}nav button{font-size:.62rem;padding:.5rem .65rem;}}
+</style>
+</head>
+<body>
+
+<header>
+  <video autoplay muted loop playsinline style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;z-index:0;opacity:0.18;">
+    <source src="https://cdn.subsplash.com/videos/7PRN4J/_source/9cfc3f0f-67d2-4c2c-9409-f9d2b7d4d976/video.mp4" type="video/mp4">
+  </video>
+  <div class="logo" style="position:relative;z-index:1;">
+    <img src="https://i.ibb.co/nq1XjZ5D/reality.png" alt="Reality 2026 Youth Conference" style="height:42px;width:auto;display:block;">
+    <span class="logo-sub">Conference Stay Finder</span>
+  </div>
+  <nav style="position:relative;z-index:1;">
+    <button class="active" onclick="showView('guest')">Find a Host</button>
+    <button onclick="showView('bookings')">My Booking</button>
+    <button onclick="showView('register')">Become a Host</button>
+    <button onclick="showView('admin')">Admin</button>
+  </nav>
+</header>
+
+<!-- GUEST VIEW -->
+<div id="view-guest" class="view active">
+  <div style="position:relative;width:100%;height:500px;overflow:hidden;background:#0a0a1a;">
+    <video autoplay muted loop playsinline style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;">
+      <source src="https://cdn.subsplash.com/videos/7PRN4J/_source/9cfc3f0f-67d2-4c2c-9409-f9d2b7d4d976/video.mp4" type="video/mp4">
+    </video>
+    <div style="position:absolute;inset:0;background:rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;">
+      <img src="https://i.ibb.co/nq1XjZ5D/reality.png" alt="Reality 2026 Youth Conference" style="max-width:min(480px,80%);width:100%;display:block;">
+    </div>
+  </div>
+  <div style="background:#fff;border-bottom:1px solid #ddd;padding:3rem 2rem;text-align:center;">
+    <div style="max-width:680px;margin:0 auto;">
+      <h2 style="font-family:'Lato',sans-serif;font-weight:900;font-size:clamp(1.6rem,4vw,2.4rem);color:#111;letter-spacing:.06em;text-transform:uppercase;margin-bottom:.6rem;">THE JOY OF FEARING GOD</h2>
+      <p style="font-family:'Lato',sans-serif;font-style:italic;font-weight:300;font-size:1.2rem;color:#555;">Finding Freedom and Joy in God</p>
+    </div>
+  </div>
+  <div style="background:#fff;border-bottom:1px solid #ddd;padding:1rem 2rem .5rem;">
+    <div style="max-width:1100px;margin:0 auto;">
+      <div style="font-size:.65rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:#888;margin-bottom:.4rem;">Housing</div>
+      <h2 style="font-family:'Lato',sans-serif;font-size:1.8rem;font-weight:900;color:#111;margin-bottom:.3rem;">Find Your Stay</h2>
+      <p style="color:#555;font-size:.86rem;line-height:1.7;margin-bottom:0;">Members of our congregation have generously opened their homes. Filter by party size and preference to find the right fit.</p>
+    </div>
+  </div>
+  <div class="main-wrap">
+    <div class="filter-bar">
+      <div class="filter-group"><label>Search</label><input id="srch" type="text" placeholder="Host name…" oninput="renderHosts()"></div>
+      <div class="filter-group"><label>Party</label><input id="psize" type="number" min="1" max="20" placeholder="# people" style="width:85px" oninput="renderHosts()"></div>
+      <div class="filter-group"><label>Preference</label>
+        <select id="gfilt" onchange="renderHosts()">
+          <option value="">Any</option>
+          <option value="Men">Men only</option>
+          <option value="Women">Women only</option>
+          <option value="Families">Families</option>
+          <option value="Mixed">Mixed / Any</option>
+        </select>
+      </div>
+      <label class="check-label"><input type="checkbox" id="avonly" onchange="renderHosts()"> Available only</label>
+    </div>
+    <div id="host-grid" class="host-grid"><div class="loading">Loading hosts…</div></div>
+  </div>
+</div>
+
+<!-- BOOKINGS VIEW -->
+<div id="view-bookings" class="view">
+  <div class="hero" style="padding-bottom:2.5rem">
+    <div class="hero-eyebrow">Reality 2026</div>
+    <h1>My <em>Booking</em></h1>
+    <div class="rule"></div>
+    <p>Enter your email or phone number to look up your booking.</p>
+  </div>
+  <div class="main-wrap">
+    <div style="max-width:420px;margin:0 auto 2rem">
+      <div class="form-group"><label>Email or Phone Number</label><input id="lookup-input" type="text" placeholder="your@email.com or (360) 000-0000" onkeydown="if(event.key==='Enter')lookupBooking()"></div>
+      <button class="btn-submit" style="width:100%;padding:.75rem" onclick="lookupBooking()">Look Up My Booking</button>
+      <div id="lookup-msg" style="margin-top:.75rem"></div>
+    </div>
+    <div id="bookings-wrap" class="bookings-wrap"></div>
+  </div>
+</div>
+
+<!-- REGISTER AS HOST VIEW -->
+<div id="view-register" class="view">
+  <div class="hero" style="padding-bottom:2.5rem">
+    <div class="hero-eyebrow">Reality Youth Conference 2026</div>
+    <h1>Become a <em>Host</em></h1>
+    <div class="rule"></div>
+    <p>Open your home to conference guests and be a blessing to the body of Christ. Fill out the form below and your listing will be submitted for admin approval.</p>
+  </div>
+  <div class="main-wrap">
+    <div style="max-width:520px;margin:0 auto">
+      <div class="admin-panel">
+        <h3>Host Registration</h3>
+        <div class="form-group"><label>Your Name / Family Name *</label><input id="r-name" type="text" placeholder="e.g. The Johnson Family" oninput="checkRegBtn()"></div>
+        <div class="form-group"><label>Email *</label><input id="r-email" type="email" placeholder="your@email.com" oninput="checkRegBtn()"></div>
+        <div class="form-group"><label>Phone *</label><input id="r-phone" type="tel" placeholder="(360) 000-0000" oninput="checkRegBtn()"></div>
+        <div class="form-group"><label>How Many Guests Can You Host? *</label><input id="r-cap" type="number" min="1" max="50" placeholder="e.g. 4" oninput="checkRegBtn()"></div>
+        <div class="form-group"><label>Guest Preference</label>
+          <select id="r-pref">
+            <option value="Mixed">Mixed / Anyone</option>
+            <option value="Men">Men only</option>
+            <option value="Women">Women only</option>
+            <option value="Families">Families preferred</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Notes (optional)</label><textarea id="r-notes" rows="3" placeholder="Pets, parking, proximity to church, amenities…"></textarea></div>
+        <div id="r-msg"></div>
+        <button id="btn-register" class="btn-submit" style="width:100%;padding:.75rem" disabled onclick="submitHostRegistration()">Submit Registration</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN VIEW -->
+<div id="view-admin" class="view">
+  <div class="hero" style="padding-bottom:2.5rem">
+    <div class="hero-eyebrow">Reality 2026</div>
+    <h1>Admin <em>Dashboard</em></h1>
+    <div class="rule"></div>
+  </div>
+  <div class="main-wrap">
+    <div id="admin-stats" class="admin-stats"></div>
+    <div class="admin-grid">
+      <div class="admin-panel">
+        <h3>Add New Host</h3>
+        <div class="form-group"><label>Host Name *</label><input id="a-name" type="text" placeholder="e.g. The Johnson Family" oninput="checkAddHostBtn()"></div>
+        <div class="form-group"><label>Total Capacity *</label><input id="a-cap" type="number" min="1" max="50" placeholder="# of guests" oninput="checkAddHostBtn()"></div>
+        <div class="form-group"><label>Guest Preference</label>
+          <select id="a-pref">
+            <option value="Mixed">Mixed / Anyone</option>
+            <option value="Men">Men only</option>
+            <option value="Women">Women only</option>
+            <option value="Families">Families preferred</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Host Email *</label><input id="a-email" type="email" placeholder="host@email.com" oninput="checkAddHostBtn()"></div>
+        <div class="form-group"><label>Host Phone *</label><input id="a-phone" type="tel" placeholder="(360) 000-0000" oninput="checkAddHostBtn()"></div>
+        <div class="form-group"><label>Notes (optional)</label><textarea id="a-notes" rows="2" placeholder="Pets, proximity, amenities…"></textarea></div>
+        <div id="admin-msg"></div>
+        <button id="btn-add-host" class="btn-submit" style="width:100%;padding:.75rem" disabled onclick="addHost()">Add Host</button>
+      </div>
+      <div class="admin-panel">
+        <h3>All Hosts</h3>
+        <div id="admin-host-list"></div>
+      </div>
+    </div>
+    <div class="admin-full-panel">
+      <h3>Pending Host Registrations</h3>
+      <div id="admin-pending"></div>
+    </div>
+    <div class="admin-full-panel">
+      <h3>All Bookings
+        <span class="export-btns">
+          <button class="tbl-btn" onclick="exportCSV('bookings')">⬇ Export Bookings</button>
+          <button class="tbl-btn" onclick="exportCSV('hosts')">⬇ Export Hosts</button>
+        </span>
+      </h3>
+      <div id="admin-bookings"></div>
+    </div>
+    <div class="admin-full-panel">
+      <h3>Change Admin Password</h3>
+      <div style="max-width:400px">
+        <div class="form-group"><label>Current Password</label>
+          <div class="pw-wrap"><input id="cp-current" type="password" placeholder="Current password"><button class="pw-eye" onclick="toggleEye('cp-current')">👁</button></div>
+        </div>
+        <div class="form-group"><label>New Password</label>
+          <div class="pw-wrap"><input id="cp-new" type="password" placeholder="New password (min 6 chars)"><button class="pw-eye" onclick="toggleEye('cp-new')">👁</button></div>
+        </div>
+        <div class="form-group"><label>Confirm New Password</label>
+          <div class="pw-wrap"><input id="cp-confirm" type="password" placeholder="Confirm new password"><button class="pw-eye" onclick="toggleEye('cp-confirm')">👁</button></div>
+        </div>
+        <div id="cp-msg"></div>
+        <button class="btn-submit" style="width:100%;padding:.75rem" onclick="changePassword()">Update Password</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BOOK MODAL -->
+<div id="modal-overlay" class="overlay">
+  <div class="modal">
+    <div class="modal-eyebrow">Reserve Your Spot</div>
+    <h3 id="m-host-name">Book a Stay</h3>
+    <p class="modal-sub" id="m-host-sub"></p>
+    <div class="form-group"><label>Your Name *</label><input id="m-name" type="text" placeholder="Full name"></div>
+    <div class="form-group"><label>Email *</label><input id="m-email" type="email" placeholder="your@email.com"></div>
+    <div class="form-group"><label>Phone Number *</label><input id="m-phone" type="tel" placeholder="(360) 000-0000"></div>
+    <div class="form-group"><label>Number of People in Your Party</label><input id="m-party" type="number" min="1" value="1" oninput="updateHint()"></div>
+    <div class="form-group"><label>Party Members' Names (optional)</label><input id="m-members" type="text" placeholder="e.g. John, Mary, Luke"></div>
+    <div class="form-group"><label>Special Notes (optional)</label><textarea id="m-notes" rows="2" placeholder="Anything the host should know…"></textarea></div>
+    <div id="party-hint" class="party-hint"></div>
+    <div id="m-msg"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-submit" onclick="confirmBooking()">Confirm Booking</button>
+    </div>
+  </div>
+</div>
+
+<!-- PASSWORD MODAL -->
+<div id="pw-overlay" class="overlay">
+  <div class="modal" style="max-width:340px">
+    <div class="modal-eyebrow">Restricted Area</div>
+    <h3>Admin Access</h3>
+    <p class="modal-sub">Enter the admin password to continue.</p>
+    <div class="form-group"><label>Password</label>
+      <div class="pw-wrap">
+        <input id="pw-input" type="password" placeholder="Enter password" onkeydown="if(event.key==='Enter')checkPassword()">
+        <button class="pw-eye" onclick="toggleEye('pw-input')">👁</button>
+      </div>
+    </div>
+    <div id="pw-msg"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closePwModal()">Cancel</button>
+      <button class="btn-submit" onclick="checkPassword()">Enter</button>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE BOOKING MODAL -->
+<div id="del-overlay" class="overlay">
+  <div class="modal" style="max-width:360px">
+    <div class="modal-eyebrow">Confirm Delete</div>
+    <h3>Remove Booking?</h3>
+    <p class="modal-sub" id="del-msg-sub"></p>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeDelModal()">Cancel</button>
+      <button class="btn-submit" style="background:#b00000" onclick="confirmDeleteBooking()">Yes, Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE HOST MODAL -->
+<div id="del-host-overlay" class="overlay">
+  <div class="modal" style="max-width:360px">
+    <div class="modal-eyebrow">Confirm Delete</div>
+    <h3>Remove Host?</h3>
+    <p class="modal-sub" id="del-host-msg-sub"></p>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeDelHostModal()">Cancel</button>
+      <button class="btn-submit" style="background:#b00000" onclick="confirmDeleteHost()">Yes, Delete</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <strong>Word of Grace Bible Church</strong><br>
+  1317 NW 12th Ave, Battle Ground, WA 98604 &nbsp;·&nbsp;
+  <a href="tel:3606873962">(360) 687-3962</a> &nbsp;·&nbsp;
+  <a href="mailto:church@slovo.org">church@slovo.org</a><br>
+  Sun 9 AM (RU) &nbsp;|&nbsp; Sun 11:30 AM (EN) &nbsp;|&nbsp; Wed 7 PM (RU)
+</footer>
+
+<script>
+var ADMIN_PASS  = 'reality2026';
+var STORAGE_KEY = 'r2026_data';
+var PENDING_KEY = 'r2026_pending';
+
+var DEFAULT_HOSTS = [
+  {id:1,name:'The Williams Family',        capacity:5,pref:'Families',email:'',phone:'',notes:'Large home with 2 guest rooms. Kids welcome. Close to the venue.',bookings:[]},
+  {id:2,name:'Sister Elena & Sister Mila', capacity:3,pref:'Women',   email:'',phone:'',notes:'Women only. Quiet apartment, 10 min walk from church.',bookings:[]},
+  {id:3,name:'Pastor & Mrs. Davis',        capacity:4,pref:'Mixed',   email:'',phone:'',notes:'Welcoming to all. Home-cooked breakfast included each morning!',bookings:[]},
+  {id:4,name:'The Rodriguez Household',    capacity:6,pref:'Mixed',   email:'',phone:'',notes:'Spacious home, two bathrooms, backyard. Great for larger groups.',bookings:[]},
+  {id:5,name:'Deacon Thompson',            capacity:2,pref:'Men',     email:'',phone:'',notes:'Men only. Near public transit. No pets please.',bookings:[]}
+];
+
+var hosts=[], nextId=6, nextBid=1, activeHostId=null, adminUnlocked=false, pendingDeleteBid=null, pendingDeleteHost=null;
+
+// ── Email ──────────────────────────────────────────────────────────────────
+function sendEmail(type, params) {
+  fetch('send_email.php', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(Object.assign({type: type}, params))
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(d){ console.log('Email result:', type, d); })
+  .catch(function(e){ console.error('Email error:', type, e); });
+}
+
+// ── Storage ────────────────────────────────────────────────────────────────
+function saveData() {
+  if (!window.storage) return;
+  window.storage.set(STORAGE_KEY, JSON.stringify({hosts:hosts,nextId:nextId,nextBid:nextBid}), true)
+    .catch(function(e){ console.warn('Save failed:',e); });
+}
+function loadData() {
+  hosts = JSON.parse(JSON.stringify(DEFAULT_HOSTS));
+  if (!window.storage) { renderHosts(); return; }
+  window.storage.get(STORAGE_KEY, true)
+    .then(function(r) {
+      if (r && r.value) {
+        try { var p=JSON.parse(r.value); if(p&&p.hosts){hosts=p.hosts;nextId=p.nextId||6;nextBid=p.nextBid||1;} } catch(e){}
+      } else { saveData(); }
+      renderHosts();
+    }).catch(function(){ renderHosts(); });
+}
+function getPending() { try { var s=localStorage.getItem(PENDING_KEY); return s?JSON.parse(s):[]; } catch(e){ return []; } }
+function setPending(arr) { try { localStorage.setItem(PENDING_KEY, JSON.stringify(arr)); } catch(e){} }
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+function spotsLeft(h) { return Math.max(0,h.capacity-h.bookings.reduce(function(s,b){return s+b.party;},0)); }
+function prefIcon(p)  { return p==='Men'?'♂ ':p==='Women'?'♀ ':p==='Families'?'⌂ ':'⊕ '; }
+function allBookings() { return hosts.reduce(function(a,h){return a.concat(h.bookings);},[]); }
+
+// ── Views ──────────────────────────────────────────────────────────────────
+function showView(v) {
+  if (v==='admin' && !adminUnlocked) { openPwModal(); return; }
+  document.querySelectorAll('.view').forEach(function(el){el.classList.remove('active');});
+  document.querySelectorAll('nav button').forEach(function(el){el.classList.remove('active');});
+  document.getElementById('view-'+v).classList.add('active');
+  var btns=document.querySelectorAll('nav button');
+  if(v==='guest')    btns[0].classList.add('active');
+  if(v==='bookings') btns[1].classList.add('active');
+  if(v==='register') btns[2].classList.add('active');
+  if(v==='admin')    btns[3].classList.add('active');
+  if(v==='guest')    renderHosts();
+  if(v==='bookings'){document.getElementById('lookup-input').value='';document.getElementById('lookup-msg').innerHTML='';renderBookings([]);}
+  if(v==='register') resetRegForm();
+  if(v==='admin')    renderAdmin();
+}
+
+// ── Password ───────────────────────────────────────────────────────────────
+function toggleEye(id){var i=document.getElementById(id);i.type=i.type==='password'?'text':'password';}
+function openPwModal(){document.getElementById('pw-input').value='';document.getElementById('pw-msg').innerHTML='';document.getElementById('pw-overlay').classList.add('open');setTimeout(function(){document.getElementById('pw-input').focus();},100);}
+function closePwModal(){document.getElementById('pw-overlay').classList.remove('open');}
+function checkPassword(){
+  if(document.getElementById('pw-input').value===ADMIN_PASS){adminUnlocked=true;closePwModal();showView('admin');}
+  else{document.getElementById('pw-msg').innerHTML='<div class="alert alert-err">Incorrect password.</div>';document.getElementById('pw-input').value='';document.getElementById('pw-input').focus();}
+}
+function changePassword(){
+  var cur=document.getElementById('cp-current').value;
+  var nw=document.getElementById('cp-new').value.trim();
+  var cf=document.getElementById('cp-confirm').value.trim();
+  var el=document.getElementById('cp-msg');
+  if(cur!==ADMIN_PASS){el.innerHTML='<div class="alert alert-err">Current password is incorrect.</div>';return;}
+  if(nw.length<6){el.innerHTML='<div class="alert alert-err">New password must be at least 6 characters.</div>';return;}
+  if(nw!==cf){el.innerHTML='<div class="alert alert-err">Passwords do not match.</div>';return;}
+  ADMIN_PASS=nw;
+  ['cp-current','cp-new','cp-confirm'].forEach(function(i){document.getElementById(i).value='';});
+  el.innerHTML='<div class="alert alert-ok">✓ Password updated successfully.</div>';
+  setTimeout(function(){el.innerHTML='';},3000);
+}
+
+// ── Host Grid ──────────────────────────────────────────────────────────────
+function renderHosts(){
+  var search=document.getElementById('srch').value.toLowerCase();
+  var psize=parseInt(document.getElementById('psize').value)||0;
+  var gfilt=document.getElementById('gfilt').value;
+  var avonly=document.getElementById('avonly').checked;
+  var filtered=hosts.filter(function(h){
+    if(search&&h.name.toLowerCase().indexOf(search)===-1)return false;
+    if(psize&&spotsLeft(h)<psize)return false;
+    if(gfilt&&h.pref!==gfilt&&h.pref!=='Mixed')return false;
+    if(avonly&&spotsLeft(h)===0)return false;
+    return true;
+  });
+  var grid=document.getElementById('host-grid');
+  if(!filtered.length){grid.innerHTML='<div class="empty" style="grid-column:1/-1"><div class="empty-icon">🏠</div>No hosts match your filters.</div>';return;}
+  grid.innerHTML=filtered.map(function(h){
+    var left=spotsLeft(h),full=left===0,used=h.capacity-left,pct=Math.round((used/h.capacity)*100);
+    return '<div class="host-card'+(full?' full':'')+'">'+
+      '<div class="card-top-bar'+(full?' full-bar':'')+'"></div>'+
+      (full?'<div class="full-ribbon">Full</div>':'')+
+      '<div class="card-body">'+
+        '<div class="card-host-name">'+h.name+'</div>'+
+        '<div class="badge-row">'+
+          '<span class="badge badge-cap">Capacity: '+h.capacity+'</span>'+
+          '<span class="badge '+(full?'badge-full':'badge-avail')+'">'+(full?'No spots':left+' spot'+(left>1?'s':'')+' left')+'</span>'+
+          '<span class="badge badge-pref">'+prefIcon(h.pref)+h.pref+'</span>'+
+        '</div>'+
+        '<div class="card-notes">'+(h.notes||'No additional notes.')+'</div>'+
+        '<div class="spots-section">'+
+          '<div class="spots-label-row"><span>Occupancy</span><span>'+used+' / '+h.capacity+' booked</span></div>'+
+          '<div class="spots-track"><div class="spots-fill'+(pct>=100?' fill-red':'')+'" style="width:'+pct+'%"></div></div>'+
+        '</div>'+
+        '<button class="btn-book"'+(full?' disabled':'')+' onclick="openModal('+h.id+')">'+(full?'No Spots Available':'Reserve This Host')+'</button>'+
+      '</div></div>';
+  }).join('');
+}
+
+// ── Book Modal ─────────────────────────────────────────────────────────────
+function openModal(id){
+  activeHostId=id;
+  var h=hosts.find(function(x){return x.id===id;});
+  document.getElementById('m-host-name').textContent=h.name;
+  document.getElementById('m-host-sub').textContent=spotsLeft(h)+' spot(s) remaining · '+h.pref+' · Capacity: '+h.capacity;
+  ['m-name','m-email','m-phone','m-members','m-notes'].forEach(function(i){document.getElementById(i).value='';});
+  document.getElementById('m-party').value='1';
+  document.getElementById('party-hint').textContent='';
+  document.getElementById('m-msg').innerHTML='';
+  document.getElementById('modal-overlay').classList.add('open');
+}
+function closeModal(){document.getElementById('modal-overlay').classList.remove('open');activeHostId=null;}
+function updateHint(){var p=parseInt(document.getElementById('m-party').value)||0;document.getElementById('party-hint').textContent=p>1?'Booking for '+p+' people — coordinate with your group before confirming.':'';}
+
+function confirmBooking(){
+  var name=document.getElementById('m-name').value.trim();
+  var email=document.getElementById('m-email').value.trim();
+  var phone=document.getElementById('m-phone').value.trim();
+  var party=parseInt(document.getElementById('m-party').value)||1;
+  var members=document.getElementById('m-members').value.trim();
+  var notes=document.getElementById('m-notes').value.trim();
+  var msgEl=document.getElementById('m-msg');
+  if(!name){msgEl.innerHTML='<div class="alert alert-err">Please enter your name.</div>';return;}
+  if(!email){msgEl.innerHTML='<div class="alert alert-err">Please enter your email address.</div>';return;}
+  if(!phone){msgEl.innerHTML='<div class="alert alert-err">Please enter your phone number.</div>';return;}
+  var h=hosts.find(function(x){return x.id===activeHostId;});
+  if(!h)return;
+  if(spotsLeft(h)<party){msgEl.innerHTML='<div class="alert alert-err">Not enough spots for a party of '+party+'. Only '+spotsLeft(h)+' available.</div>';return;}
+  h.bookings.push({bookingId:nextBid++,hostId:activeHostId,name:name,email:email,phone:phone,party:party,members:members,notes:notes});
+  saveData();
+  var params={
+    host_name:h.name, host_email:h.email||'', host_phone:h.phone||'',
+    guest_name:name, guest_email:email, guest_phone:phone,
+    party:party, members:members||'—', notes:notes||'—', spots_left:spotsLeft(h)
+  };
+  if(email)   sendEmail('guest_confirmation', params);
+  if(h.email) sendEmail('host_notification',  params);
+  msgEl.innerHTML='<div class="alert alert-ok">✓ Booking confirmed, '+name+'! A confirmation email has been sent.</div>';
+  setTimeout(function(){closeModal();renderHosts();},1800);
+}
+
+// ── Lookup ─────────────────────────────────────────────────────────────────
+function lookupBooking(){
+  var val=document.getElementById('lookup-input').value.trim().toLowerCase();
+  var msgEl=document.getElementById('lookup-msg');
+  if(!val){msgEl.innerHTML='<div class="alert alert-err">Please enter your email or phone number.</div>';return;}
+  var found=allBookings().filter(function(b){return b.email.toLowerCase()===val||b.phone.replace(/\D/g,'')===val.replace(/\D/g,'');});
+  if(!found.length){msgEl.innerHTML='<div class="alert alert-err">No booking found. Please check your email or phone number.</div>';renderBookings([]);return;}
+  msgEl.innerHTML='<div class="alert alert-ok">✓ Found '+found.length+' booking(s).</div>';
+  renderBookings(found);
+}
+function renderBookings(list){
+  var el=document.getElementById('bookings-wrap');
+  if(!list||!list.length){el.innerHTML='';return;}
+  el.innerHTML=list.map(function(b){
+    var h=hosts.find(function(x){return x.id===b.hostId;});
+    return '<div class="booking-item">'+
+      '<div class="booking-left">'+
+        '<div class="booking-host">🏠 '+(h?h.name:'Unknown Host')+'</div>'+
+        '<div class="booking-guest">👤 '+b.name+' · '+b.email+' · '+b.phone+'</div>'+
+        '<div class="booking-party">Party of '+b.party+(b.members?' · '+b.members:'')+(b.notes?' · '+b.notes:'')+'</div>'+
+        (h && (h.email||h.phone) ? 
+          '<div style="margin-top:.75rem;padding:.75rem;background:#f7f7f7;border:1px solid #ddd;font-size:.8rem;">'+
+            '<div style="font-size:.62rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#888;margin-bottom:.5rem;">Host Contact</div>'+
+            (h.email ? '<div style="margin-bottom:.3rem;">📧 <a href="mailto:'+h.email+'" style="color:#111;text-decoration:none;">'+h.email+'</a></div>' : '')+
+            (h.phone ? '<div>📞 <a href="tel:'+h.phone+'" style="color:#111;text-decoration:none;">'+h.phone+'</a></div>' : '')+
+          '</div>' 
+        : '')+
+      '</div>'+
+      '<button class="btn-remove" onclick="cancelBooking('+b.bookingId+')">Cancel</button>'+
+    '</div>';
+  }).join('');
+}
+function cancelBooking(bid){
+  hosts.forEach(function(h){h.bookings=h.bookings.filter(function(x){return x.bookingId!==bid;});});
+  saveData();lookupBooking();
+}
+
+// ── Host Registration ──────────────────────────────────────────────────────
+function checkRegBtn(){
+  var ready=document.getElementById('r-name').value.trim().length>0&&
+            document.getElementById('r-email').value.trim().length>0&&
+            document.getElementById('r-phone').value.trim().length>0&&
+            parseInt(document.getElementById('r-cap').value)>0;
+  document.getElementById('btn-register').disabled=!ready;
+}
+function resetRegForm(){
+  ['r-name','r-email','r-phone','r-cap','r-notes'].forEach(function(i){document.getElementById(i).value='';});
+  document.getElementById('r-pref').value='Mixed';
+  document.getElementById('r-msg').innerHTML='';
+  checkRegBtn();
+}
+function submitHostRegistration(){
+  var name=document.getElementById('r-name').value.trim();
+  var email=document.getElementById('r-email').value.trim();
+  var phone=document.getElementById('r-phone').value.trim();
+  var cap=parseInt(document.getElementById('r-cap').value);
+  var pref=document.getElementById('r-pref').value;
+  var notes=document.getElementById('r-notes').value.trim();
+  var pending=getPending();
+  pending.push({name:name,email:email,phone:phone,capacity:cap,pref:pref,notes:notes,submittedAt:new Date().toLocaleDateString()});
+  setPending(pending);
+  document.getElementById('r-msg').innerHTML='<div class="alert alert-ok">✓ Thank you, '+name+'! Your registration has been submitted. An admin will review and activate your listing shortly.</div>';
+  document.getElementById('btn-register').disabled=true;
+  ['r-name','r-email','r-phone','r-cap','r-notes'].forEach(function(i){document.getElementById(i).value='';});
+}
+
+// ── Admin ──────────────────────────────────────────────────────────────────
+function checkAddHostBtn(){
+  var ready=document.getElementById('a-name').value.trim().length>0&&
+            parseInt(document.getElementById('a-cap').value)>0&&
+            document.getElementById('a-email').value.trim().length>0&&
+            document.getElementById('a-phone').value.trim().length>0;
+  document.getElementById('btn-add-host').disabled=!ready;
+}
+function addHost(){
+  var name=document.getElementById('a-name').value.trim();
+  var cap=parseInt(document.getElementById('a-cap').value);
+  var pref=document.getElementById('a-pref').value;
+  var email=document.getElementById('a-email').value.trim();
+  var phone=document.getElementById('a-phone').value.trim();
+  var notes=document.getElementById('a-notes').value.trim();
+  hosts.push({id:nextId++,name:name,capacity:cap,pref:pref,email:email,phone:phone,notes:notes,bookings:[]});
+  saveData();
+  ['a-name','a-cap','a-email','a-phone','a-notes'].forEach(function(i){document.getElementById(i).value='';});
+  checkAddHostBtn();
+  document.getElementById('admin-msg').innerHTML='<div class="alert alert-ok">✓ '+name+' added successfully.</div>';
+  setTimeout(function(){document.getElementById('admin-msg').innerHTML='';},2500);
+  renderAdmin();
+}
+
+function openDelHostModal(id){
+  var h=hosts.find(function(x){return x.id===id;});
+  document.getElementById('del-host-msg-sub').textContent=h?'Remove "'+h.name+'" and all their bookings?':'Remove this host?';
+  pendingDeleteHost=id;
+  document.getElementById('del-host-overlay').classList.add('open');
+}
+function closeDelHostModal(){document.getElementById('del-host-overlay').classList.remove('open');pendingDeleteHost=null;}
+function confirmDeleteHost(){
+  if(pendingDeleteHost===null)return;
+  hosts=hosts.filter(function(x){return x.id!==pendingDeleteHost;});
+  saveData();closeDelHostModal();renderAdmin();
+}
+
+function editHost(id){
+  var h=hosts.find(function(x){return x.id===id;});
+  if(!h)return;
+  document.getElementById('hrow-'+id).innerHTML=
+    '<div class="host-row-info">'+
+      '<div style="margin-bottom:.4rem"><input class="tbl-input" id="eh-name-'+id+'" value="'+h.name+'"></div>'+
+      '<div style="display:flex;gap:.4rem;margin-bottom:.4rem">'+
+        '<input class="tbl-input" id="eh-cap-'+id+'" type="number" min="1" value="'+h.capacity+'" style="width:70px">'+
+        '<select id="eh-pref-'+id+'" style="flex:1;border:1px solid #ddd;padding:.3rem .5rem;font-family:\'Montserrat\',sans-serif;font-size:.82rem;outline:none;">'+
+          '<option value="Mixed"'+(h.pref==='Mixed'?' selected':'')+'>Mixed</option>'+
+          '<option value="Men"'+(h.pref==='Men'?' selected':'')+'>Men only</option>'+
+          '<option value="Women"'+(h.pref==='Women'?' selected':'')+'>Women only</option>'+
+          '<option value="Families"'+(h.pref==='Families'?' selected':'')+'>Families</option>'+
+        '</select>'+
+      '</div>'+
+      '<div style="margin-bottom:.4rem"><input class="tbl-input" id="eh-email-'+id+'" value="'+(h.email||'')+'" placeholder="Email"></div>'+
+      '<div style="margin-bottom:.4rem"><input class="tbl-input" id="eh-phone-'+id+'" value="'+(h.phone||'')+'" placeholder="Phone"></div>'+
+      '<div style="margin-bottom:.6rem"><input class="tbl-input" id="eh-notes-'+id+'" value="'+(h.notes||'')+'" placeholder="Notes"></div>'+
+      '<div style="display:flex;gap:.4rem">'+
+        '<button class="tbl-btn" style="flex:1" onclick="saveHost('+id+')">Save</button>'+
+        '<button class="tbl-btn" style="flex:1" onclick="renderAdmin()">Cancel</button>'+
+      '</div>'+
+    '</div>';
+}
+function saveHost(id){
+  var h=hosts.find(function(x){return x.id===id;});
+  if(!h)return;
+  h.name=document.getElementById('eh-name-'+id).value.trim();
+  h.capacity=parseInt(document.getElementById('eh-cap-'+id).value)||h.capacity;
+  h.pref=document.getElementById('eh-pref-'+id).value;
+  h.email=document.getElementById('eh-email-'+id).value.trim();
+  h.phone=document.getElementById('eh-phone-'+id).value.trim();
+  h.notes=document.getElementById('eh-notes-'+id).value.trim();
+  saveData();renderAdmin();
+}
+
+function openDelModal(bid){
+  var b=allBookings().find(function(x){return x.bookingId===bid;});
+  var h=b?hosts.find(function(x){return x.id===b.hostId;}):null;
+  document.getElementById('del-msg-sub').textContent=b?'Remove booking for '+b.name+' at '+(h?h.name:'Unknown Host')+'?':'Remove this booking?';
+  pendingDeleteBid=bid;
+  document.getElementById('del-overlay').classList.add('open');
+}
+function closeDelModal(){document.getElementById('del-overlay').classList.remove('open');pendingDeleteBid=null;}
+function confirmDeleteBooking(){
+  if(pendingDeleteBid===null)return;
+  hosts.forEach(function(h){h.bookings=h.bookings.filter(function(x){return x.bookingId!==pendingDeleteBid;});});
+  saveData();closeDelModal();renderAdmin();
+}
+
+function editBooking(bid){
+  var b=allBookings().find(function(x){return x.bookingId===bid;});
+  if(!b)return;
+  document.getElementById('brow-'+bid).innerHTML=
+    '<td><input class="tbl-input" id="e-name-'+bid+'" value="'+b.name+'"><br>'+
+    '<input class="tbl-input" id="e-email-'+bid+'" value="'+b.email+'" style="margin-top:3px"></td>'+
+    '<td><input class="tbl-input" id="e-phone-'+bid+'" value="'+(b.phone||'')+'"></td>'+
+    '<td><input class="tbl-input" id="e-party-'+bid+'" type="number" min="1" value="'+b.party+'" style="width:55px"></td>'+
+    '<td><input class="tbl-input" id="e-members-'+bid+'" value="'+(b.members||'')+'"></td>'+
+    '<td><input class="tbl-input" id="e-notes-'+bid+'" value="'+(b.notes||'')+'"></td>'+
+    '<td style="white-space:nowrap">'+
+      '<button class="tbl-btn" onclick="saveBooking('+bid+')">Save</button>'+
+      '<button class="tbl-btn" onclick="renderAdmin()">Cancel</button>'+
+    '</td>';
+}
+function saveBooking(bid){
+  var found=null;
+  hosts.forEach(function(h){h.bookings.forEach(function(b){if(b.bookingId===bid)found=b;});});
+  if(!found)return;
+  found.name=document.getElementById('e-name-'+bid).value.trim();
+  found.email=document.getElementById('e-email-'+bid).value.trim();
+  found.phone=document.getElementById('e-phone-'+bid).value.trim();
+  found.party=parseInt(document.getElementById('e-party-'+bid).value)||1;
+  found.members=document.getElementById('e-members-'+bid).value.trim();
+  found.notes=document.getElementById('e-notes-'+bid).value.trim();
+  saveData();renderAdmin();
+}
+
+function renderPending(){
+  var el=document.getElementById('admin-pending');
+  var pending=getPending();
+  if(!pending.length){el.innerHTML='<div class="empty">No pending registrations.</div>';return;}
+  el.innerHTML='<table><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Capacity</th><th>Preference</th><th>Notes</th><th>Submitted</th><th></th></tr></thead><tbody>'+
+    pending.map(function(p,i){
+      return '<tr>'+
+        '<td style="font-weight:600">'+p.name+'</td>'+
+        '<td class="muted">'+p.email+'</td>'+
+        '<td class="muted">'+p.phone+'</td>'+
+        '<td style="text-align:center">'+p.capacity+'</td>'+
+        '<td class="muted">'+p.pref+'</td>'+
+        '<td class="muted">'+(p.notes||'—')+'</td>'+
+        '<td class="muted">'+(p.submittedAt||'—')+'</td>'+
+        '<td style="white-space:nowrap">'+
+          '<button class="tbl-btn approve" onclick="approvePending('+i+')">✓ Approve</button>'+
+          '<button class="tbl-btn del" onclick="declinePending('+i+')">✕ Decline</button>'+
+        '</td></tr>';
+    }).join('')+'</tbody></table>';
+}
+function approvePending(idx){
+  var pending=getPending();
+  var p=pending[idx];
+  if(!p)return;
+  hosts.push({id:nextId++,name:p.name,capacity:p.capacity,pref:p.pref,email:p.email,phone:p.phone,notes:p.notes||'',bookings:[]});
+  pending.splice(idx,1);
+  setPending(pending);
+  saveData();
+  if(p.email){
+    sendEmail('host_approval',{
+      host_name:p.name, host_email:p.email,
+      capacity:p.capacity, pref:p.pref, notes:p.notes||'—'
+    });
+  }
+  renderAdmin();
+}
+function declinePending(idx){
+  var pending=getPending();
+  pending.splice(idx,1);
+  setPending(pending);
+  renderPending();
+}
+
+function exportCSV(type){
+  var rows=[];
+  if(type==='bookings'){
+    rows.push(['Host','Guest Name','Email','Phone','Party Size','Members','Notes']);
+    hosts.forEach(function(h){h.bookings.forEach(function(b){rows.push([h.name,b.name,b.email,b.phone||'',b.party,b.members||'',b.notes||'']);});});
+  } else {
+    rows.push(['Host Name','Capacity','Spots Left','Preference','Email','Phone','Notes']);
+    hosts.forEach(function(h){rows.push([h.name,h.capacity,spotsLeft(h),h.pref,h.email||'',h.phone||'',h.notes||'']);});
+  }
+  var csv=rows.map(function(r){return r.map(function(c){return '"'+String(c).replace(/"/g,'""')+'"';}).join(',');}).join('\r\n');
+  var blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;a.download='reality2026_'+type+'.csv';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+}
+
+function renderAdmin(){
+  var totalCap=hosts.reduce(function(s,h){return s+h.capacity;},0);
+  var totalBooked=hosts.reduce(function(s,h){return s+h.bookings.reduce(function(ss,b){return ss+b.party;},0);},0);
+  var bkgs=allBookings();
+  document.getElementById('admin-stats').innerHTML=
+    [['Hosts',hosts.length],['Total Spots',totalCap],['Booked',totalBooked],['Available',totalCap-totalBooked]]
+    .map(function(x){return '<div class="stat-card"><div class="stat-num">'+x[1]+'</div><div class="stat-lbl">'+x[0]+'</div></div>';}).join('');
+  var hl=document.getElementById('admin-host-list');
+  hl.innerHTML=hosts.length?hosts.map(function(h){
+    var left=spotsLeft(h);
+    return '<div class="host-row" id="hrow-'+h.id+'">'+
+      '<div class="host-row-info"><div class="host-row-name">'+h.name+'</div>'+
+      '<div class="host-row-sub">'+h.pref+' · '+(h.capacity-left)+'/'+h.capacity+' booked · '+left+' left</div></div>'+
+      '<button class="tbl-btn" onclick="editHost('+h.id+')">Edit</button>'+
+      '<button class="btn-del" onclick="openDelHostModal('+h.id+')">🗑</button></div>';
+  }).join(''):'<div class="empty">No hosts yet.</div>';
+  renderPending();
+  var ab=document.getElementById('admin-bookings');
+  if(!bkgs.length){ab.innerHTML='<div class="empty">No bookings yet.</div>';return;}
+  ab.innerHTML='<table><thead><tr><th>Host</th><th>Guest</th><th>Phone</th><th>Party</th><th>Members</th><th>Notes</th><th></th></tr></thead><tbody>'+
+    bkgs.map(function(b){
+      var h=hosts.find(function(x){return x.id===b.hostId;});
+      return '<tr id="brow-'+b.bookingId+'">'+
+        '<td style="font-weight:600">'+(h?h.name:'-')+'</td>'+
+        '<td>'+b.name+'<br><span style="color:#888;font-size:.76rem">'+b.email+'</span></td>'+
+        '<td class="muted">'+(b.phone||'—')+'</td>'+
+        '<td style="text-align:center">'+b.party+'</td>'+
+        '<td class="muted">'+(b.members||'—')+'</td>'+
+        '<td class="muted">'+(b.notes||'—')+'</td>'+
+        '<td style="white-space:nowrap">'+
+          '<button class="tbl-btn" onclick="editBooking('+b.bookingId+')">Edit</button>'+
+          '<button class="tbl-btn del" onclick="openDelModal('+b.bookingId+')">Delete</button>'+
+        '</td></tr>';
+    }).join('')+'</tbody></table>';
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────
+document.getElementById('modal-overlay').addEventListener('click',function(e){if(e.target===document.getElementById('modal-overlay'))closeModal();});
+document.getElementById('pw-overlay').addEventListener('click',function(e){if(e.target===document.getElementById('pw-overlay'))closePwModal();});
+document.getElementById('del-overlay').addEventListener('click',function(e){if(e.target===document.getElementById('del-overlay'))closeDelModal();});
+document.getElementById('del-host-overlay').addEventListener('click',function(e){if(e.target===document.getElementById('del-host-overlay'))closeDelHostModal();});
+loadData();
+</script>
+</body>
+</html>
